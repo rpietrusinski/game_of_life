@@ -4,15 +4,38 @@ import numpy.random.bounded_integers
 import numpy.random.entropy
 from matplotlib import pyplot as plt
 from scipy.signal import convolve2d
-import argparse
+import tkinter as tk
 
-# argparse
-parser = argparse.ArgumentParser(description="Pass game parameters.")
-parser.add_argument('-d', '--dim', type=int, help="Dimension of game")
-parser.add_argument('-n', '--n_iter', type=int, help="Number of game iterations")
-args = parser.parse_args()
-dim = args.dim
-n_iter = args.n_iter
+
+class InputApp(tk.Tk):
+    """User input interface.
+
+    """
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self.title("Game of Life")
+        self.geometry("250x100")
+        self.L1 = tk.Label(self, text="dim [int]")
+        self.L1.config(font=("Arial", 14))
+        self.E1 = tk.Entry(self)
+        self.L2 = tk.Label(self, text="n_iter [int]")
+        self.L2.config(font=("Arial", 14))
+        self.E2 = tk.Entry(self)
+        self.quit = tk.Button(self, text="OK", fg="red", command=self.on_button)
+        self.quit.config(height=1, width=15)
+        self.dim = None
+        self.n_iter = None
+
+        self.L1.grid(row=1, column=0)
+        self.L2.grid(row=2, column=0)
+        self.E1.grid(row=1, column=1)
+        self.E2.grid(row=2, column=1)
+        self.quit.grid(row=3, column=1)
+
+    def on_button(self):
+        self.dim = self.E1.get()
+        self.n_iter = self.E2.get()
+        self.destroy()
 
 
 def generate_start_population(dim_: int) -> np.array:
@@ -21,7 +44,7 @@ def generate_start_population(dim_: int) -> np.array:
     :param dim_: Dimension
     :return: array with zeroes and ones indicating living and dead cells
     """
-    x_t0 = np.random.choice([0, 1], size=(dim_ ** 2,), p=[.9, .1]).reshape(dim_, dim_)
+    x_t0 = np.random.choice([0, 1], size=(dim_ ** 2,), p=[.5, .5]).reshape(dim_, dim_)
     return x_t0
 
 
@@ -63,12 +86,16 @@ def run_experiment(dim_: int, n_iter_: int) -> None:
     for i in range(n_iter_):
         ax.imshow(popul, cmap='Greys')
         ax.set_title("Iter: {}".format(i))
-        plt.pause(.5)
+        plt.pause(.25)
         next_popul = life_step_2(popul)
         popul = next_popul
-    plt.pause(10)
+    plt.pause(5)
     plt.close()
 
 
 if __name__ == '__main__':
+    w = InputApp()
+    w.mainloop()
+    dim = int(w.dim)
+    n_iter = int(w.n_iter)
     run_experiment(dim, n_iter)
